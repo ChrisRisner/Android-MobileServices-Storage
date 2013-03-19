@@ -4,5 +4,9 @@
     <string name="app_name">StorageDemo</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
+    <string name="table_storage">Table Storage</string>
+    <string name="blob_storage">Blob Storage</string>
+    <string name="launch_screen_info">Which type of Windows Azure storage do you want to work with?</string>
+    <string name="title_activity_tables">TablesActivity</string>
 
 </resources>

@@ -1,0 +1,18 @@
+package com.msdpe.storagedemo;
+
+import android.app.Application;
+
+public class StorageApplication extends Application {
+
+	private StorageService mStorageService;
+	
+	public StorageApplication() {}
+	
+	public StorageService getStorageService() {
+		if (mStorageService == null) {
+			mStorageService = new StorageService(this);
+		}
+		return mStorageService;
+	}
+		
+}
