@@ -8,5 +8,8 @@
     <string name="blob_storage">Blob Storage</string>
     <string name="launch_screen_info">Which type of Windows Azure storage do you want to work with?</string>
     <string name="title_activity_tables">TablesActivity</string>
+    <string name="create">Create</string>
+    <string name="cancel">Cancel</string>
+    <string name="table_name">Table Name:</string>
 
 </resources>

@@ -1,5 +1,7 @@
 package com.msdpe.storagedemo;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -7,26 +9,34 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.microsoft.windowsazure.mobileservices.ServiceFilterResponse;
 import com.microsoft.windowsazure.mobileservices.TableJsonQueryCallback;
+import com.microsoft.windowsazure.mobileservices.TableOperationCallback;
 
 import android.os.Bundle;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ListActivity;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.support.v4.app.NavUtils;
 import android.annotation.TargetApi;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.IntentFilter;
 import android.os.Build;
 
 public class TablesActivity extends ListActivity {
 	private Context mCon;
 	private StorageService mStorageService;
+	private final String TAG = "TabelsActivity";
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -80,6 +90,29 @@ public class TablesActivity extends ListActivity {
 			//
 			NavUtils.navigateUpFromSameTask(this);
 			return true;
+		case R.id.action_add_table:
+		      //Show new table dialog
+			AlertDialog.Builder builder = new AlertDialog.Builder(mCon);
+            // Get the layout inflater
+            LayoutInflater inflater = ((Activity) mCon).getLayoutInflater();
+            //Create our dialog view
+            View dialogView = inflater.inflate(R.layout.dialog_new_table, null);
+            final EditText txtTableName = (EditText) dialogView.findViewById(R.id.txtTableName);
+            builder.setView(dialogView)
+                   .setPositiveButton(R.string.create, new DialogInterface.OnClickListener() {
+                       @Override
+                       public void onClick(DialogInterface dialog, int id) {	
+                    	   mStorageService.addTable(txtTableName.getText().toString());                          
+                       }
+                   })
+                   .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                       public void onClick(DialogInterface dialog, int id) {
+                    	   dialog.cancel();
+                       }
+                   });    
+            
+            builder.show();
+		    break;
 		}
 		return super.onOptionsItemSelected(item);
 	}

@@ -14,10 +14,12 @@ import android.widget.ArrayAdapter;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceJsonTable;
 import com.microsoft.windowsazure.mobileservices.MobileServiceTable;
 import com.microsoft.windowsazure.mobileservices.ServiceFilterResponse;
+import com.microsoft.windowsazure.mobileservices.TableJsonOperationCallback;
 import com.microsoft.windowsazure.mobileservices.TableJsonQueryCallback;
 import com.microsoft.windowsazure.mobileservices.TableQueryCallback;
 
@@ -50,7 +52,10 @@ public class StorageService {
 			@Override
 			public void onCompleted(JsonElement result, int count, Exception exception,
 					ServiceFilterResponse response) {
-				// TODO Auto-generated method stub				
+				if (exception != null) {
+					Log.e(TAG, exception.getMessage());
+					return;
+				}
 				JsonArray results = result.getAsJsonArray();
 				//String[] tables = new String[results.size()];
 				
@@ -69,5 +74,22 @@ public class StorageService {
 				mContext.sendBroadcast(broadcast);
 			}
 		});		
+	}
+	
+	public void addTable(String tableName) {
+		JsonObject newTable = new JsonObject();
+		newTable.addProperty("tableName", tableName);
+		
+		mTableTables.insert(newTable, new TableJsonOperationCallback() {			
+			@Override
+			public void onCompleted(JsonObject jsonObject, Exception exception,
+					ServiceFilterResponse response) {
+				if (exception != null) {
+					Log.e(TAG, exception.getMessage());
+					return;
+				}
+				getTables();
+			}
+		});
 	}
 }
