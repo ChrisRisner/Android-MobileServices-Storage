@@ -27,6 +27,7 @@ import android.view.ActionMode;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,6 +39,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.Toast;
 
 public class TableRowsActivity extends ListActivity {
@@ -73,6 +75,25 @@ public class TableRowsActivity extends ListActivity {
 				JsonElement element = mStorageService.getLoadedTableRows()[position];
 				String name = element.getAsJsonObject().getAsJsonPrimitive("Name").getAsString();				
 				Toast.makeText(mContext, name, Toast.LENGTH_SHORT).show();
+			}
+		});
+		
+		this.getListView().setOnItemLongClickListener(new OnItemLongClickListener() {
+
+			@Override
+			public boolean onItemLongClick(AdapterView<?> parent, View view,
+					int position, long id) {
+				//Toast.makeText(mCon, "long click", Toast.LENGTH_SHORT).show();
+				
+				if (mActionMode != null) {
+		            return false;
+		        }
+
+				mSelectedRowPosition = position;
+		        // Start the CAB using the ActionMode.Callback defined above
+		        mActionMode = ((Activity) mContext).startActionMode(mActionModeCallback);
+		        view.setSelected(true);
+		        return true;
 			}
 		});
 	}
@@ -219,4 +240,53 @@ public class TableRowsActivity extends ListActivity {
 			return view;
 		}
 	}
+	
+	private ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
+
+	    // Called when the action mode is created; startActionMode() was called
+	    @Override
+	    public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+	        // Inflate a menu resource providing context menu items
+	        MenuInflater inflater = mode.getMenuInflater();
+	        inflater.inflate(R.menu.context_tables, menu);
+	        return true;
+	    }
+
+	    // Called each time the action mode is shown. Always called after onCreateActionMode, but
+	    // may be called multiple times if the mode is invalidated.
+	    @Override
+	    public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+	        return false; // Return false if nothing is done
+	    }
+
+	    // Called when the user selects a contextual menu item
+	    @Override
+	    public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+	        switch (item.getItemId()) {
+	            case R.id.action_delete_table:
+	            	//Delete the selected table
+	            	//String tableName = mStorageService.getLoadedTables().get(mSelectedTablePosition).get("TableName");
+	            	//Toast.makeText(mCon, "table:" + tableName, Toast.LENGTH_SHORT).show();
+	            	//mStorageService.deleteTable(tableName);
+	            	//mStorageService.deleteTable(tableName)
+	            	
+	            	JsonElement element = mStorageService.getLoadedTableRows()[mSelectedRowPosition];
+					String partitionKey = element.getAsJsonObject().getAsJsonPrimitive("PartitionKey").getAsString();				
+					String rowKey = element.getAsJsonObject().getAsJsonPrimitive("RowKey").getAsString();
+	            	
+	            	mStorageService.deleteTableRow(mTableName, partitionKey, rowKey);
+	                mode.finish(); // Action picked, so close the CAB
+	                return true;
+	            default:
+	                return false;
+	        }
+	    }
+
+	    // Called when the user exits the action mode
+	    @Override
+	    public void onDestroyActionMode(ActionMode mode) {
+	    	mSelectedRowPosition = -1;
+	        mActionMode = null;
+	    }
+	};
 }

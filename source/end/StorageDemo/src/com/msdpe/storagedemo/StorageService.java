@@ -65,7 +65,7 @@ public class StorageService {
 			public void onCompleted(JsonElement result, int count, Exception exception,
 					ServiceFilterResponse response) {
 				if (exception != null) {
-					Log.e(TAG, exception.getMessage());
+					Log.e(TAG, exception.getCause().getMessage());
 					return;
 				}
 				JsonArray results = result.getAsJsonArray();
@@ -97,7 +97,7 @@ public class StorageService {
 			public void onCompleted(JsonObject jsonObject, Exception exception,
 					ServiceFilterResponse response) {
 				if (exception != null) {
-					Log.e(TAG, exception.getMessage());
+					Log.e(TAG, exception.getCause().getMessage());
 					return;
 				}
 				getTables();
@@ -116,7 +116,7 @@ public class StorageService {
 			@Override
 			public void onCompleted(Exception exception, ServiceFilterResponse response) {
 				if (exception != null) {
-					Log.e(TAG, exception.getMessage());
+					Log.e(TAG, exception.getCause().getMessage());
 					return;
 				}
 				getTables();
@@ -150,5 +150,26 @@ public class StorageService {
 				mContext.sendBroadcast(broadcast);
 			}
 		});		
+	}
+	
+	public void deleteTableRow(final String tableName, String partitionKey, String rowKey) {
+		JsonObject row = new JsonObject();		
+		row.addProperty("id", 0);
+		
+		List<Pair<String,String>> parameters = new ArrayList<Pair<String, String>>();
+		parameters.add(new Pair<String, String>("tableName", tableName));
+		parameters.add(new Pair<String, String>("rowKey", rowKey));
+		parameters.add(new Pair<String, String>("partitionKey", partitionKey));
+		
+		mTableTableRows.delete(row, parameters, new TableDeleteCallback() {			
+			@Override
+			public void onCompleted(Exception exception, ServiceFilterResponse response) {
+				if (exception != null) {
+					Log.e(TAG, exception.getCause().getMessage());
+					return;
+				}
+				getTableRows(tableName);
+			}
+		});
 	}
 }
