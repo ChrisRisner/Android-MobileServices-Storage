@@ -5,7 +5,7 @@
     android:versionName="1.0" >
 
     <uses-sdk
-        android:minSdkVersion="8"
+        android:minSdkVersion="11"
         android:targetSdkVersion="17" />
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -33,6 +33,16 @@
                 android:value="com.msdpe.storagedemo.MainActivity" />
             <intent-filter>
             	<action android:name="tables.loaded"></action>
+        </intent-filter>
+        </activity>
+        <activity
+            android:name="com.msdpe.storagedemo.TableRowsActivity"            
+            android:parentActivityName="com.msdpe.storagedemo.TablesActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.msdpe.storagedemo.TablesActivity" />
+            <intent-filter>
+            	<action android:name="tablerows.loaded"></action>
         </intent-filter>
         </activity>
     </application>
