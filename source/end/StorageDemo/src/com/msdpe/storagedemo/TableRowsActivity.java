@@ -75,9 +75,15 @@ public class TableRowsActivity extends ListActivity {
 			public void onItemClick(AdapterView<?> parent, View view, int position,
 					long id) {
 				//This was tested against the Users table
-				JsonElement element = mStorageService.getLoadedTableRows()[position];
-				String name = element.getAsJsonObject().getAsJsonPrimitive("Name").getAsString();				
-				Toast.makeText(mContext, name, Toast.LENGTH_SHORT).show();
+//				JsonElement element = mStorageService.getLoadedTableRows()[position];
+//				String name = element.getAsJsonObject().getAsJsonPrimitive("Name").getAsString();				
+//				Toast.makeText(mContext, name, Toast.LENGTH_SHORT).show();
+				
+				Intent tableIntent = new Intent(getApplicationContext(), EditTableRowActivity.class);
+				tableIntent.putExtra("TableName", mTableName);
+				tableIntent.putExtra("IsNewRow", false);
+				tableIntent.putExtra("RowPosition", position);
+				startActivity(tableIntent);
 			}
 		});
 		
@@ -163,7 +169,8 @@ public class TableRowsActivity extends ListActivity {
 			return true;
 		case R.id.action_add_table_row:
 			Intent tableIntent = new Intent(getApplicationContext(), EditTableRowActivity.class);
-			//tableIntent.putExtra("TableName", lblTable.getText().toString());
+			tableIntent.putExtra("TableName", mTableName);
+			tableIntent.putExtra("IsNewRow", true);
 			startActivity(tableIntent);
 			return true;
 		}
