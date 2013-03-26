@@ -33,10 +33,12 @@ public class StorageService {
 	//private MobileServiceTable<PlayerRecord> mPlayerRecordsTable;
 	private MobileServiceJsonTable mTableTables;
 	private MobileServiceJsonTable mTableTableRows;
+	private MobileServiceJsonTable mTableContainers;
 	private Context mContext;
 	private final String TAG = "StorageService";
 	private List<Map<String, String>> mTables;
 	private ArrayList<JsonElement> mTableRows;
+	private List<Map<String, String>> mContainers;
 
 	public StorageService(Context context) {
 		mContext = context;
@@ -45,6 +47,7 @@ public class StorageService {
 			mClient = new MobileServiceClient("https://storagedemo.azure-mobile.net/", "oZaSIwBYgHrBiCApdCVcatyDxHQRCT23", mContext);
 			mTableTables = mClient.getTable("Tables");		
 			mTableTableRows = mClient.getTable("TableRows");
+			mTableContainers = mClient.getTable("BlobContainers");
 		} catch (MalformedURLException e) {
 			Log.e(TAG, "There was an error creating the Mobile Service. Verify the URL");
 		}
@@ -56,6 +59,10 @@ public class StorageService {
 	
 	public JsonElement[] getLoadedTableRows() {
 		return this.mTableRows.toArray(new JsonElement[this.mTableRows.size()]);
+	}
+	
+	public List<Map<String, String>> getLoadedContainers() {
+		return this.mContainers;
 	}
 	
 	public void getTables() {
@@ -217,5 +224,56 @@ public class StorageService {
 				getTableRows(tableName);
 			}
 		});
+	}
+	
+	public void getContainers() {
+		mTableContainers.where().execute(new TableJsonQueryCallback() {
+			
+			@Override
+			public void onCompleted(JsonElement result, int count, Exception exception,
+					ServiceFilterResponse response) {
+				if (exception != null) {
+					Log.e(TAG, exception.getCause().getMessage());
+					return;
+				}
+				JsonArray results = result.getAsJsonArray();
+				//String[] tables = new String[results.size()];
+				
+				mContainers = new ArrayList<Map<String, String>>();
+				
+				for (int i = 0; i < results.size(); i ++) {
+					JsonElement item = results.get(i);
+					Map<String, String> map = new HashMap<String, String>();
+					map.put("ContainerName", item.getAsJsonObject().getAsJsonPrimitive("name").getAsString());
+					
+					mContainers.add(map);
+				}
+				Intent broadcast = new Intent();
+				broadcast.setAction("containers.loaded");
+				mContext.sendBroadcast(broadcast);
+			}
+		});		
+	}
+	
+	public void addContainer(String containerName, boolean isPublic) {
+		
+		JsonObject newContainer = new JsonObject();
+		newContainer.addProperty("containerName", containerName);
+		
+		List<Pair<String,String>> parameters = new ArrayList<Pair<String, String>>();
+		parameters.add(new Pair<String, String>("isPublic", isPublic ? "1" : "0"));
+		
+		mTableContainers.insert(newContainer, parameters, new TableJsonOperationCallback() {			
+			@Override
+			public void onCompleted(JsonObject jsonObject, Exception exception,
+					ServiceFilterResponse response) {
+				if (exception != null) {
+					Log.e(TAG, exception.getCause().getMessage());
+					return;
+				}
+				getContainers();
+			}
+		});
+		
 	}
 }

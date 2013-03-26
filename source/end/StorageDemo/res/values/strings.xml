@@ -8,6 +8,7 @@
     <string name="blob_storage">Blob Storage</string>
     <string name="launch_screen_info">Which type of Windows Azure storage do you want to work with?</string>
     <string name="title_activity_tables">TablesActivity</string>
+    <string name="title_activity_containers">ContainersActivity</string>
     <string name="create">Create</string>
     <string name="cancel">Cancel</string>
     <string name="table_name">Table Name:</string>
@@ -15,5 +16,11 @@
     <string name="add_table_row">Add Row</string>
     <string name="save_row">Save Row</string>
     <string name="title_activity_new_table_row">NewTableRowActivity</string>
-
+    <string name="add_container">Add Container</string>
+    <string name="container_name">Container Name:</string>
+	<string name="yes">Yes</string>
+	<string name="no">No</string>
+	<string name="is_public">Is Public:</string>
+	
+	
 </resources>

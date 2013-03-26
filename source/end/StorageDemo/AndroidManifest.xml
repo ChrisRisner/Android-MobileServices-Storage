@@ -58,6 +58,19 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.msdpe.storagedemo.TableRowsActivity" />
         </activity>
+        <activity
+            android:name="com.msdpe.storagedemo.ContainersActivity"
+            android:label="@string/title_activity_containers"
+            android:parentActivityName="com.msdpe.storagedemo.MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.msdpe.storagedemo.MainActivity" />
+
+            <intent-filter>
+                <action android:name="containers.loaded" >
+                </action>
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>
