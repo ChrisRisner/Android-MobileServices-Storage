@@ -1,19 +1,24 @@
 package com.msdpe.storagedemo;
 
 import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
 import com.google.gson.JsonElement;
 
+import android.os.Build;
 import android.os.Bundle;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.Pair;
 import android.view.ActionMode;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -73,6 +78,20 @@ public class EditTableRowActivity extends Activity {
 		}
 	}
 	
+	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
+	private void setupActionBar() {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+			getActionBar().setDisplayHomeAsUpEnabled(true);
+		}
+	}
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.edit_table_row, menu);
+		return true;
+	}
+	
 	private void setupForNewTable() {
 		TextView lblTemp = (TextView) findViewById(R.id.lblTemp);
 		lblTemp.setText("NewTable");
@@ -106,14 +125,15 @@ public class EditTableRowActivity extends Activity {
 	private void setupInterfaceForData(Set<Entry<String, JsonElement>> set) {
 		
 
-		LinearLayout layoutItem = (LinearLayout) findViewById(R.id.layoutRoot);
+		LinearLayout layoutRoot = (LinearLayout) findViewById(R.id.layoutRoot);
 		
 		//@"link",@"etag",@"updated",@"id"
 		
 		for (Entry<String, JsonElement> entry : set) {
 			String key = entry.getKey();
 			
-			if (key.equals("link") || key.equals("etag") || key.equals("updated") || key.equals("id")) {
+			if (key.equals("link") || key.equals("etag") || key.equals("updated") 
+					|| key.equals("id") || key.equals("Timestamp")) {
 				continue;
 			}
 			
@@ -129,6 +149,7 @@ public class EditTableRowActivity extends Activity {
 			} else {
 				lblKey = new EditText(mContext);
 			}
+			lblKey.setTag("Key");
 			((TextView) lblKey).setText(entry.getKey());
 			((TextView) lblKey).setWidth(100);
 			((TextView) lblKey).setTextSize(12);
@@ -145,7 +166,7 @@ public class EditTableRowActivity extends Activity {
 			} else {
 				lblValue = new EditText(mContext);
 			}
-			
+			lblValue.setTag("Value");
 			((TextView) lblValue).setWidth(150);
 			((TextView) lblValue).setTextSize(12);
 			RelativeLayout.LayoutParams valueParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
@@ -160,25 +181,20 @@ public class EditTableRowActivity extends Activity {
 			((TextView) lblValue).setGravity(Gravity.RIGHT);
 			rowLayout.addView(lblKey);
 			rowLayout.addView(lblValue);
-			layoutItem.addView(rowLayout);
+			layoutRoot.addView(rowLayout);
 		}
 	}
 
 	/**
 	 * Set up the {@link android.app.ActionBar}.
 	 */
-	private void setupActionBar() {
+//	private void setupActionBar() {
+//
+//		getActionBar().setDisplayHomeAsUpEnabled(true);
+//
+//	}
 
-		getActionBar().setDisplayHomeAsUpEnabled(true);
-
-	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.new_table_row, menu);
-		return true;
-	}
+	
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
@@ -196,8 +212,48 @@ public class EditTableRowActivity extends Activity {
 			//Calling onBack here becuase using the NavUtils default code doesn't restore state for some reason
 			onBackPressed();
 			return true;
+		case R.id.action_save_row:
+//			Intent tableIntent = new Intent(getApplicationContext(), EditTableRowActivity.class);
+//			tableIntent.putExtra("TableName", mTableName);
+//			tableIntent.putExtra("IsNewRow", true);
+//			if (mStorageService.getLoadedTableRows().length == 0) {
+//				tableIntent.putExtra("IsNewTable", true);
+//			}
+//			startActivity(tableIntent);
+			if (mIsNewRow || mIsNewTable) {
+				List<Pair<String,String>> rowData = getRowDataFromInterface();
+				mStorageService.addTableRow(mTableName, rowData);
+			} else {
+				List<Pair<String,String>> rowData = getRowDataFromInterface();
+			}
+			finish();
+			return true;
+		
 		}
 		return super.onOptionsItemSelected(item);
+	}
+	
+	private List<Pair<String,String>> getRowDataFromInterface() {
+		List<Pair<String,String>> rowData = new ArrayList<Pair<String, String>>();
+		LinearLayout layoutRoot = (LinearLayout) findViewById(R.id.layoutRoot);
+		
+		for (int i = 0; i < layoutRoot.getChildCount(); i++) {
+			
+			
+			View childView = layoutRoot.getChildAt(i); 
+			if (childView.getClass() == RelativeLayout.class) {
+				RelativeLayout childLayout = (RelativeLayout) childView;
+//				for (int j = 0; j < childLayout.getChildCount(); j++) {
+//					TextView   = childLayout.getChildAt(j);
+//					Log.w(TAG, "TAG: " + v2.getTag());
+//				}
+				TextView txtKey = (TextView) childLayout.findViewWithTag("Key");
+				TextView txtValue = (TextView) childLayout.findViewWithTag("Value");
+				rowData.add(new Pair<String, String>(txtKey.getText().toString(), txtValue.getText().toString()));
+			}
+			
+		}		
+		return rowData;
 	}
 
 }

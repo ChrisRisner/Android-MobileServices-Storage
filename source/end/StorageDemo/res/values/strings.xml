@@ -13,6 +13,7 @@
     <string name="table_name">Table Name:</string>
     <string name="add_table">Add Table</string>
     <string name="add_table_row">Add Row</string>
+    <string name="save_row">Save Row</string>
     <string name="title_activity_new_table_row">NewTableRowActivity</string>
 
 </resources>
