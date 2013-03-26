@@ -198,12 +198,11 @@ public class ContainersActivity extends ListActivity {
 	    @Override
 	    public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
 	        switch (item.getItemId()) {
-	            case R.id.action_delete_table:
+	            case R.id.action_delete_container:
 	            	//Delete the selected table
-	            	String tableName = mStorageService.getLoadedContainers().get(mSelectedContainerPosition).get("ContainerName");
+	            	String containerName = mStorageService.getLoadedContainers().get(mSelectedContainerPosition).get("ContainerName");
 	            	//Toast.makeText(mCon, "table:" + tableName, Toast.LENGTH_SHORT).show();
-	            	//mStorageService.deleteTable(tableName);
-	            	
+	            	mStorageService.deleteContainer(containerName);
 	            	//delete the container
 	            	
 	                mode.finish(); // Action picked, so close the CAB

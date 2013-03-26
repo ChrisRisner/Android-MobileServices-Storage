@@ -273,7 +273,25 @@ public class StorageService {
 				}
 				getContainers();
 			}
-		});
+		});		
+	}
+	
+	public void deleteContainer(String containerName) {
+		JsonObject container = new JsonObject();		
+		container.addProperty("id", 0);
 		
+		List<Pair<String,String>> parameters = new ArrayList<Pair<String, String>>();
+		parameters.add(new Pair<String, String>("containerName", containerName));
+		
+		mTableContainers.delete(container, parameters, new TableDeleteCallback() {			
+			@Override
+			public void onCompleted(Exception exception, ServiceFilterResponse response) {
+				if (exception != null) {
+					Log.e(TAG, exception.getCause().getMessage());
+					return;
+				}
+				getContainers();
+			}
+		});
 	}
 }
