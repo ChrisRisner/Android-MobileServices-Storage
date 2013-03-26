@@ -19,9 +19,14 @@
     <string name="title_activity_new_table_row">NewTableRowActivity</string>
     <string name="add_container">Add Container</string>
     <string name="container_name">Container Name:</string>
-	<string name="yes">Yes</string>
-	<string name="no">No</string>
-	<string name="is_public">Is Public:</string>
-	<string name="add_blob">Add Blob</string>
-	
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="is_public">Is Public:</string>
+    <string name="add_blob">Add Blob</string>
+    <string name="title_activity_blob_details">BlobDetailsActivity</string>
+    <string name="blob_name">Blob Name:</string>
+    <string name="url">URL:</string>
+    <string name="content_type">Content-Type:</string>
+   	<string name="load_with_sas">Load with SAS</string>
+
 </resources>

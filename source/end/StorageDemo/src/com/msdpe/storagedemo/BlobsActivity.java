@@ -55,7 +55,7 @@ public class BlobsActivity extends ListActivity {
 		Log.i(TAG, "Container: " + mContainerName);
 				
 		mContext = this;
-		mStorageService.getBlobsForContainer(mContainerName);
+		mStorageService.getBlobsForContainer(mContainerName);		
 		
 		this.getListView().setOnItemClickListener(new OnItemClickListener() {
 
@@ -64,10 +64,11 @@ public class BlobsActivity extends ListActivity {
 					long id) {
 				
 				TextView lblTable = (TextView) view;
-				Toast.makeText(mContext, lblTable.getText().toString(), Toast.LENGTH_SHORT).show();
-//				Intent tableIntent = new Intent(getApplicationContext(), BlobsActivity.class);
-//				tableIntent.putExtra("TableName", lblTable.getText().toString());
-//				startActivity(tableIntent);
+				Intent blobDetailsIntent = new Intent(getApplicationContext(), BlobDetailsActivity.class);
+				blobDetailsIntent.putExtra("ContainerName", mContainerName);
+				blobDetailsIntent.putExtra("BlobName", lblTable.getText().toString());
+				blobDetailsIntent.putExtra("BlobPosition", position);
+				startActivity(blobDetailsIntent);
 			}
 		});
 		
@@ -169,7 +170,7 @@ public class BlobsActivity extends ListActivity {
 	private BroadcastReceiver receiver = new BroadcastReceiver() {
 		public void onReceive(Context context, android.content.Intent intent) {
 			
-			List<Map<String,String>> blobs = mStorageService.getLoadedBlobs();
+			List<Map<String,String>> blobs = mStorageService.getLoadedBlobNames();
 			
 			String[] strBlobs = new String[blobs.size()];
 			for (int i = 0; i < blobs.size(); i ++) {
@@ -207,7 +208,7 @@ public class BlobsActivity extends ListActivity {
 	        switch (item.getItemId()) {
 	            case R.id.action_delete_blob:
 	            	//Delete the selected table
-	            	String blobName = mStorageService.getLoadedBlobs().get(mSelectedBlobPosition).get("BlobName");
+	            	String blobName = mStorageService.getLoadedBlobNames().get(mSelectedBlobPosition).get("BlobName");
 	            	//Toast.makeText(mCon, "table:" + tableName, Toast.LENGTH_SHORT).show();
 	            	mStorageService.deleteBlob(mContainerName, blobName);
 	            	//delete the container

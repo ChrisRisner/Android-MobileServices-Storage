@@ -40,7 +40,9 @@ public class StorageService {
 	private List<Map<String, String>> mTables;
 	private ArrayList<JsonElement> mTableRows;
 	private List<Map<String, String>> mContainers;
-	private List<Map<String, String>> mBlobs;
+	private List<Map<String, String>> mBlobNames;
+	private ArrayList<JsonElement> mBlobObjects;
+	private JsonObject mLoadedBlob;
 
 	public StorageService(Context context) {
 		mContext = context;
@@ -68,8 +70,16 @@ public class StorageService {
 		return this.mContainers;
 	}
 	
-	public List<Map<String, String>> getLoadedBlobs() {
-		return this.mBlobs;
+	public List<Map<String, String>> getLoadedBlobNames() {
+		return this.mBlobNames;
+	}
+	
+	public JsonElement[] getLoadedBlobObjects() {
+		return this.mBlobObjects.toArray(new JsonElement[this.mBlobObjects.size()]);
+	}
+	
+	public JsonObject getLoadedBlob() {
+		return this.mLoadedBlob;
 	}
 	
 	public void getTables() {
@@ -317,14 +327,16 @@ public class StorageService {
 				JsonArray results = result.getAsJsonArray();
 				//String[] tables = new String[results.size()];
 				
-				mBlobs = new ArrayList<Map<String, String>>();
-				
+				mBlobNames = new ArrayList<Map<String, String>>();				
+				mBlobObjects = new ArrayList<JsonElement>();				
+								
 				for (int i = 0; i < results.size(); i ++) {
 					JsonElement item = results.get(i);
+					mBlobObjects.add(item);
 					Map<String, String> map = new HashMap<String, String>();
 					map.put("BlobName", item.getAsJsonObject().getAsJsonPrimitive("name").getAsString());
 					
-					mBlobs.add(map);
+					mBlobNames.add(map);
 				}
 				Intent broadcast = new Intent();
 				broadcast.setAction("blobs.loaded");
@@ -349,6 +361,32 @@ public class StorageService {
 					return;
 				}
 				getBlobsForContainer(containerName);
+			}
+		});
+	}
+	
+	public void getBlobSas(String containerName, String blobName) {
+		JsonObject blob = new JsonObject();		
+		blob.addProperty("id", 0);
+		
+		List<Pair<String,String>> parameters = new ArrayList<Pair<String, String>>();
+		parameters.add(new Pair<String, String>("containerName", containerName));
+		parameters.add(new Pair<String, String>("blobName", blobName));
+		
+		mTableBlobs.insert(blob, parameters, new TableJsonOperationCallback() {			
+			@Override
+			public void onCompleted(JsonObject jsonObject, Exception exception,
+					ServiceFilterResponse response) {
+				if (exception != null) {
+					Log.e(TAG, exception.getCause().getMessage());
+					return;
+				}
+				
+				mLoadedBlob = jsonObject;
+				
+				Intent broadcast = new Intent();
+				broadcast.setAction("blob.loaded");
+				mContext.sendBroadcast(broadcast);
 			}
 		});
 	}

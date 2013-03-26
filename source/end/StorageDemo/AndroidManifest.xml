@@ -84,6 +84,19 @@
                 </action>
             </intent-filter>
         </activity>
+        <activity
+            android:name="com.msdpe.storagedemo.BlobDetailsActivity"
+            android:label="@string/title_activity_blob_details"
+            android:parentActivityName="com.msdpe.storagedemo.BlobsActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.msdpe.storagedemo.BlobsActivity" />
+            
+            <intent-filter>
+                <action android:name="blob.loaded" >
+                </action>
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>
