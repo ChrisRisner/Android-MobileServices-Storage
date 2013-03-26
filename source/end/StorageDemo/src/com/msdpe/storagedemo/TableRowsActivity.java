@@ -63,9 +63,9 @@ public class TableRowsActivity extends ListActivity {
 		Intent launchIntent = getIntent();
 		mTableName = launchIntent.getStringExtra("TableName");
 		Log.i(TAG, "TABLE: " + mTableName);
-		if (savedInstanceState != null && savedInstanceState.containsKey("TableName")) {
-			mTableName = savedInstanceState.getString("TableName");
-		}
+//		if (savedInstanceState != null && savedInstanceState.containsKey("TableName")) {
+//			mTableName = savedInstanceState.getString("TableName");
+//		}
 		
 		mStorageService.getTableRows(mTableName);	
 		
@@ -107,12 +107,12 @@ public class TableRowsActivity extends ListActivity {
 		});
 	}
 	
-	@Override
-	protected void onSaveInstanceState(Bundle outState) {		
-		super.onSaveInstanceState(outState);
-		Log.w(TAG, "onSaveInstanceState");
-		outState.putString("TableName", mTableName);
-	}
+//	@Override
+//	protected void onSaveInstanceState(Bundle outState) {		
+//		super.onSaveInstanceState(outState);
+//		Log.w(TAG, "onSaveInstanceState");
+//		outState.putString("TableName", mTableName);
+//	}
 	
 	@Override
 	protected void onResume() {
@@ -147,12 +147,12 @@ public class TableRowsActivity extends ListActivity {
 		return true;
 	}
 	
-	@Override
-	protected void onRestoreInstanceState(Bundle state) {
-		super.onRestoreInstanceState(state);
-		
-		Log.w(TAG, "onRestoreInstanceState");
-	}
+//	@Override
+//	protected void onRestoreInstanceState(Bundle state) {
+//		super.onRestoreInstanceState(state);
+//		
+//		Log.w(TAG, "onRestoreInstanceState");
+//	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
@@ -171,6 +171,9 @@ public class TableRowsActivity extends ListActivity {
 			Intent tableIntent = new Intent(getApplicationContext(), EditTableRowActivity.class);
 			tableIntent.putExtra("TableName", mTableName);
 			tableIntent.putExtra("IsNewRow", true);
+			if (mStorageService.getLoadedTableRows().length == 0) {
+				tableIntent.putExtra("IsNewTable", true);
+			}
 			startActivity(tableIntent);
 			return true;
 		}
@@ -214,29 +217,6 @@ public class TableRowsActivity extends ListActivity {
 			
 			for (Entry<String, JsonElement> entry : set) {
 				Log.i(TAG, entry.getKey());
-//				if (entry.getKey().equals("PartitionKey"))
-//					lblPartitionKeyValue.setText(entry.getValue().getAsString());
-//				if (entry.getKey().equals("RowKey"))
-//					lblRowKeyValue.setText(entry.getValue().getAsString());
-				
-//				LinearLayout rowLayout = new LinearLayout(mContext);
-//				LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-//				params.leftMargin = 20;
-//				rowLayout.setLayoutParams(params);				
-//				rowLayout.setOrientation(LinearLayout.HORIZONTAL);
-//				TextView lblKey = new TextView(mContext);
-//				lblKey.setText(entry.getKey());
-//				//lblKey.setPadding(20, 0, 50, 0);
-//				TextView lblValue = new TextView(mContext);
-//				InputFilter[] FilterArray = new InputFilter[1];
-//				FilterArray[0] = new InputFilter.LengthFilter(8);
-//				lblValue.setFilters(FilterArray);
-//				lblValue.setText(entry.getValue().getAsString());
-//				lblValue.setGravity(Gravity.RIGHT);
-//				rowLayout.addView(lblKey);
-//				rowLayout.addView(lblValue);
-//				layoutItem.addView(rowLayout);
-				
 				
 				RelativeLayout rowLayout = new RelativeLayout(mContext);
 				RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
