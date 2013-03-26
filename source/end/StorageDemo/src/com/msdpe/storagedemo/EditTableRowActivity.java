@@ -225,6 +225,7 @@ public class EditTableRowActivity extends Activity {
 				mStorageService.addTableRow(mTableName, rowData);
 			} else {
 				List<Pair<String,String>> rowData = getRowDataFromInterface();
+				mStorageService.updateTableRow(mTableName, rowData);
 			}
 			finish();
 			return true;

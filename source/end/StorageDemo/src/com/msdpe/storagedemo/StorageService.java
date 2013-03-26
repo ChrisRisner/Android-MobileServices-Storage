@@ -194,4 +194,28 @@ public class StorageService {
 			}
 		});
 	}
+	
+	public void updateTableRow(final String tableName, List<Pair<String,String>> tableRowData) {
+		JsonObject newRow = new JsonObject();
+		for (Pair<String,String> pair : tableRowData) {
+			newRow.addProperty(pair.first, pair.second);
+		}
+		//Add ID Parameter since it's required on the server side
+		newRow.addProperty("id", 1);
+		
+		List<Pair<String,String>> parameters = new ArrayList<Pair<String, String>>();
+		parameters.add(new Pair<String, String>("table", tableName));
+		
+		mTableTableRows.update(newRow, parameters, new TableJsonOperationCallback() {			
+			@Override
+			public void onCompleted(JsonObject jsonObject, Exception exception,
+					ServiceFilterResponse response) {
+				if (exception != null) {
+					Log.e(TAG, exception.getCause().getMessage());
+					return;
+				}
+				getTableRows(tableName);
+			}
+		});
+	}
 }
