@@ -15,6 +15,7 @@ import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
+import android.util.Log;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -32,12 +33,13 @@ import android.widget.ToggleButton;
 import android.view.View;
 import android.widget.TextView;
 
-public class ContainersActivity extends ListActivity {
+public class BlobsActivity extends ListActivity {
 	private Context mContext;
 	private StorageService mStorageService;
-	private final String TAG = "ContainersActivity";
+	private final String TAG = "BlobsActivity";
 	private ActionMode mActionMode;
-	private int mSelectedContainerPosition;
+	private int mSelectedBlobPosition;
+	private String mContainerName;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -47,9 +49,13 @@ public class ContainersActivity extends ListActivity {
 				
 		StorageApplication myApp = (StorageApplication) getApplication();
 		mStorageService = myApp.getStorageService();
+		
+		Intent launchIntent = getIntent();
+		mContainerName = launchIntent.getStringExtra("ContainerName");
+		Log.i(TAG, "Container: " + mContainerName);
 				
 		mContext = this;
-		mStorageService.getContainers();
+		mStorageService.getBlobsForContainer(mContainerName);
 		
 		this.getListView().setOnItemClickListener(new OnItemClickListener() {
 
@@ -58,10 +64,10 @@ public class ContainersActivity extends ListActivity {
 					long id) {
 				
 				TextView lblTable = (TextView) view;
-				//Toast.makeText(mContext, lblTable.getText().toString(), Toast.LENGTH_SHORT).show();
-				Intent blobIntent = new Intent(getApplicationContext(), BlobsActivity.class);
-				blobIntent.putExtra("ContainerName", lblTable.getText().toString());
-				startActivity(blobIntent);
+				Toast.makeText(mContext, lblTable.getText().toString(), Toast.LENGTH_SHORT).show();
+//				Intent tableIntent = new Intent(getApplicationContext(), BlobsActivity.class);
+//				tableIntent.putExtra("TableName", lblTable.getText().toString());
+//				startActivity(tableIntent);
 			}
 		});
 		
@@ -76,7 +82,7 @@ public class ContainersActivity extends ListActivity {
 		            return false;
 		        }
 
-				mSelectedContainerPosition = position;
+				mSelectedBlobPosition = position;
 		        // Start the CAB using the ActionMode.Callback defined above
 		        mActionMode = ((Activity) mContext).startActionMode(mActionModeCallback);
 		        view.setSelected(true);
@@ -100,7 +106,7 @@ public class ContainersActivity extends ListActivity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.containers, menu);
+		getMenuInflater().inflate(R.menu.blobs, menu);
 		return true;
 	}
 	
@@ -117,30 +123,30 @@ public class ContainersActivity extends ListActivity {
 			//
 			NavUtils.navigateUpFromSameTask(this);
 			return true;
-		case R.id.action_add_container:
+		case R.id.action_add_blob:
 		      //Show new table dialog
-			AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-            // Get the layout inflater
-            LayoutInflater inflater = ((Activity) mContext).getLayoutInflater();
-            //Create our dialog view
-            View dialogView = inflater.inflate(R.layout.dialog_new_container, null);
-            final EditText txtContainerName = (EditText) dialogView.findViewById(R.id.txtContainerName);
-
-            final ToggleButton btnIsPublic = (ToggleButton) dialogView.findViewById(R.id.btnIsPublic);
-            builder.setView(dialogView)
-                   .setPositiveButton(R.string.create, new DialogInterface.OnClickListener() {
-                       @Override
-                       public void onClick(DialogInterface dialog, int id) {
-                    	   mStorageService.addContainer(txtContainerName.getText().toString(), btnIsPublic.isChecked());                          
-                       }
-                   })
-                   .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                       public void onClick(DialogInterface dialog, int id) {
-                    	   dialog.cancel();
-                       }
-                   });    
-            
-            builder.show();
+//			AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+//            // Get the layout inflater
+//            LayoutInflater inflater = ((Activity) mContext).getLayoutInflater();
+//            //Create our dialog view
+//            View dialogView = inflater.inflate(R.layout.dialog_new_container, null);
+//            final EditText txtContainerName = (EditText) dialogView.findViewById(R.id.txtContainerName);
+//
+//            final ToggleButton btnIsPublic = (ToggleButton) dialogView.findViewById(R.id.btnIsPublic);
+//            builder.setView(dialogView)
+//                   .setPositiveButton(R.string.create, new DialogInterface.OnClickListener() {
+//                       @Override
+//                       public void onClick(DialogInterface dialog, int id) {
+//                    	   mStorageService.addContainer(txtContainerName.getText().toString(), btnIsPublic.isChecked());                          
+//                       }
+//                   })
+//                   .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+//                       public void onClick(DialogInterface dialog, int id) {
+//                    	   dialog.cancel();
+//                       }
+//                   });    
+//            
+//            builder.show();
 		    break;
 		}
 		return super.onOptionsItemSelected(item);
@@ -149,7 +155,7 @@ public class ContainersActivity extends ListActivity {
 	@Override
 	protected void onResume() {
 		IntentFilter filter = new IntentFilter();
-		filter.addAction("containers.loaded");
+		filter.addAction("blobs.loaded");
 		registerReceiver(receiver, filter);
 		super.onResume();
 	}
@@ -163,15 +169,15 @@ public class ContainersActivity extends ListActivity {
 	private BroadcastReceiver receiver = new BroadcastReceiver() {
 		public void onReceive(Context context, android.content.Intent intent) {
 			
-			List<Map<String,String>> containers = mStorageService.getLoadedContainers();
+			List<Map<String,String>> blobs = mStorageService.getLoadedBlobs();
 			
-			String[] strContainers = new String[containers.size()];
-			for (int i = 0; i < containers.size(); i ++) {
-				strContainers[i] = containers.get(i).get("ContainerName");
+			String[] strBlobs = new String[blobs.size()];
+			for (int i = 0; i < blobs.size(); i ++) {
+				strBlobs[i] = blobs.get(i).get("BlobName");
 			}
 			
 			ArrayAdapter<String> listAdapter = new ArrayAdapter<String>(mContext,
-	                android.R.layout.simple_list_item_1, strContainers);
+	                android.R.layout.simple_list_item_1, strBlobs);
 			setListAdapter(listAdapter);	
 			
 		}
@@ -184,7 +190,7 @@ public class ContainersActivity extends ListActivity {
 	    public boolean onCreateActionMode(ActionMode mode, Menu menu) {
 	        // Inflate a menu resource providing context menu items
 	        MenuInflater inflater = mode.getMenuInflater();
-	        inflater.inflate(R.menu.context_containers, menu);
+	        inflater.inflate(R.menu.context_blobs, menu);
 	        return true;
 	    }
 
@@ -199,11 +205,11 @@ public class ContainersActivity extends ListActivity {
 	    @Override
 	    public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
 	        switch (item.getItemId()) {
-	            case R.id.action_delete_container:
+	            case R.id.action_delete_blob:
 	            	//Delete the selected table
-	            	String containerName = mStorageService.getLoadedContainers().get(mSelectedContainerPosition).get("ContainerName");
+	            	String blobName = mStorageService.getLoadedBlobs().get(mSelectedBlobPosition).get("BlobName");
 	            	//Toast.makeText(mCon, "table:" + tableName, Toast.LENGTH_SHORT).show();
-	            	mStorageService.deleteContainer(containerName);
+	            	mStorageService.deleteBlob(mContainerName, blobName);
 	            	//delete the container
 	            	
 	                mode.finish(); // Action picked, so close the CAB
@@ -216,7 +222,7 @@ public class ContainersActivity extends ListActivity {
 	    // Called when the user exits the action mode
 	    @Override
 	    public void onDestroyActionMode(ActionMode mode) {
-	    	mSelectedContainerPosition = -1;
+	    	mSelectedBlobPosition = -1;
 	        mActionMode = null;
 	    }
 	};

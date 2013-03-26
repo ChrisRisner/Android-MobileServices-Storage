@@ -34,11 +34,13 @@ public class StorageService {
 	private MobileServiceJsonTable mTableTables;
 	private MobileServiceJsonTable mTableTableRows;
 	private MobileServiceJsonTable mTableContainers;
+	private MobileServiceJsonTable mTableBlobs;
 	private Context mContext;
 	private final String TAG = "StorageService";
 	private List<Map<String, String>> mTables;
 	private ArrayList<JsonElement> mTableRows;
 	private List<Map<String, String>> mContainers;
+	private List<Map<String, String>> mBlobs;
 
 	public StorageService(Context context) {
 		mContext = context;
@@ -48,6 +50,7 @@ public class StorageService {
 			mTableTables = mClient.getTable("Tables");		
 			mTableTableRows = mClient.getTable("TableRows");
 			mTableContainers = mClient.getTable("BlobContainers");
+			mTableBlobs = mClient.getTable("BlobBlobs");
 		} catch (MalformedURLException e) {
 			Log.e(TAG, "There was an error creating the Mobile Service. Verify the URL");
 		}
@@ -63,6 +66,10 @@ public class StorageService {
 	
 	public List<Map<String, String>> getLoadedContainers() {
 		return this.mContainers;
+	}
+	
+	public List<Map<String, String>> getLoadedBlobs() {
+		return this.mBlobs;
 	}
 	
 	public void getTables() {
@@ -291,6 +298,57 @@ public class StorageService {
 					return;
 				}
 				getContainers();
+			}
+		});
+	}
+	
+	public void getBlobsForContainer(String containerName) {
+		
+		
+		mTableBlobs.execute(mTableBlobs.parameter("container", containerName), new TableJsonQueryCallback() {
+			
+			@Override
+			public void onCompleted(JsonElement result, int count, Exception exception,
+					ServiceFilterResponse response) {
+				if (exception != null) {
+					Log.e(TAG, exception.getCause().getMessage());
+					return;
+				}
+				JsonArray results = result.getAsJsonArray();
+				//String[] tables = new String[results.size()];
+				
+				mBlobs = new ArrayList<Map<String, String>>();
+				
+				for (int i = 0; i < results.size(); i ++) {
+					JsonElement item = results.get(i);
+					Map<String, String> map = new HashMap<String, String>();
+					map.put("BlobName", item.getAsJsonObject().getAsJsonPrimitive("name").getAsString());
+					
+					mBlobs.add(map);
+				}
+				Intent broadcast = new Intent();
+				broadcast.setAction("blobs.loaded");
+				mContext.sendBroadcast(broadcast);
+			}
+		});		
+	}
+	
+	public void deleteBlob(final String containerName, String blobName) {
+		JsonObject blob = new JsonObject();		
+		blob.addProperty("id", 0);
+		
+		List<Pair<String,String>> parameters = new ArrayList<Pair<String, String>>();
+		parameters.add(new Pair<String, String>("containerName", containerName));
+		parameters.add(new Pair<String, String>("blobName", blobName));
+		
+		mTableBlobs.delete(blob, parameters, new TableDeleteCallback() {			
+			@Override
+			public void onCompleted(Exception exception, ServiceFilterResponse response) {
+				if (exception != null) {
+					Log.e(TAG, exception.getCause().getMessage());
+					return;
+				}
+				getBlobsForContainer(containerName);
 			}
 		});
 	}
