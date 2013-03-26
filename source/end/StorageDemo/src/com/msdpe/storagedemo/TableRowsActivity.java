@@ -63,6 +63,9 @@ public class TableRowsActivity extends ListActivity {
 		Intent launchIntent = getIntent();
 		mTableName = launchIntent.getStringExtra("TableName");
 		Log.i(TAG, "TABLE: " + mTableName);
+		if (savedInstanceState != null && savedInstanceState.containsKey("TableName")) {
+			mTableName = savedInstanceState.getString("TableName");
+		}
 		
 		mStorageService.getTableRows(mTableName);	
 		
@@ -99,7 +102,15 @@ public class TableRowsActivity extends ListActivity {
 	}
 	
 	@Override
+	protected void onSaveInstanceState(Bundle outState) {		
+		super.onSaveInstanceState(outState);
+		Log.w(TAG, "onSaveInstanceState");
+		outState.putString("TableName", mTableName);
+	}
+	
+	@Override
 	protected void onResume() {
+		Log.w(TAG, "onResume");
 		IntentFilter filter = new IntentFilter();
 		filter.addAction("tablerows.loaded");
 		registerReceiver(receiver, filter);
@@ -108,6 +119,7 @@ public class TableRowsActivity extends ListActivity {
 	
 	@Override
 	protected void onPause() {
+		Log.w(TAG, "onPause");
 		unregisterReceiver(receiver);
 		super.onPause();
 	}
@@ -125,8 +137,15 @@ public class TableRowsActivity extends ListActivity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.tables, menu);
+		getMenuInflater().inflate(R.menu.tablerows, menu);
 		return true;
+	}
+	
+	@Override
+	protected void onRestoreInstanceState(Bundle state) {
+		super.onRestoreInstanceState(state);
+		
+		Log.w(TAG, "onRestoreInstanceState");
 	}
 
 	@Override
@@ -141,6 +160,11 @@ public class TableRowsActivity extends ListActivity {
 			// http://developer.android.com/design/patterns/navigation.html#up-vs-back
 			//
 			NavUtils.navigateUpFromSameTask(this);
+			return true;
+		case R.id.action_add_table_row:
+			Intent tableIntent = new Intent(getApplicationContext(), EditTableRowActivity.class);
+			//tableIntent.putExtra("TableName", lblTable.getText().toString());
+			startActivity(tableIntent);
 			return true;
 		}
 		return super.onOptionsItemSelected(item);

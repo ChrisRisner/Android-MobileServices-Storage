@@ -7,14 +7,15 @@
     <uses-sdk
         android:minSdkVersion="11"
         android:targetSdkVersion="17" />
+
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
+        android:name="com.msdpe.storagedemo.StorageApplication"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme"
-        android:name="StorageApplication" >
+        android:theme="@style/AppTheme" >
         <activity
             android:name="com.msdpe.storagedemo.MainActivity"
             android:label="@string/app_name" >
@@ -31,19 +32,31 @@
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.msdpe.storagedemo.MainActivity" />
+
             <intent-filter>
-            	<action android:name="tables.loaded"></action>
-        </intent-filter>
+                <action android:name="tables.loaded" >
+                </action>
+            </intent-filter>
         </activity>
         <activity
-            android:name="com.msdpe.storagedemo.TableRowsActivity"            
+            android:name="com.msdpe.storagedemo.TableRowsActivity"
             android:parentActivityName="com.msdpe.storagedemo.TablesActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.msdpe.storagedemo.TablesActivity" />
+
             <intent-filter>
-            	<action android:name="tablerows.loaded"></action>
-        </intent-filter>
+                <action android:name="tablerows.loaded" >
+                </action>
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.msdpe.storagedemo.EditTableRowActivity"
+            android:label="@string/title_activity_new_table_row"
+            android:parentActivityName="com.msdpe.storagedemo.TableRowsActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.msdpe.storagedemo.TableRowsActivity" />
         </activity>
     </application>
 
