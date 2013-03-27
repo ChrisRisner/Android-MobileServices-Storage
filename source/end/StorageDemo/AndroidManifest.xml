@@ -82,6 +82,8 @@
             <intent-filter>
                 <action android:name="blobs.loaded" >
                 </action>
+                <action android:name="blob.created" >
+                </action>              
             </intent-filter>
         </activity>
         <activity

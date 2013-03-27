@@ -390,4 +390,30 @@ public class StorageService {
 			}
 		});
 	}
+	
+	public void getSasForNewBlob(String containerName, String blobName) {
+		JsonObject blob = new JsonObject();		
+		blob.addProperty("id", 0);
+		
+		List<Pair<String,String>> parameters = new ArrayList<Pair<String, String>>();
+		parameters.add(new Pair<String, String>("containerName", containerName));
+		parameters.add(new Pair<String, String>("blobName", blobName));
+		
+		mTableBlobs.insert(blob, parameters, new TableJsonOperationCallback() {			
+			@Override
+			public void onCompleted(JsonObject jsonObject, Exception exception,
+					ServiceFilterResponse response) {
+				if (exception != null) {
+					Log.e(TAG, exception.getCause().getMessage());
+					return;
+				}
+				
+				mLoadedBlob = jsonObject;
+				
+				Intent broadcast = new Intent();
+				broadcast.setAction("blob.created");
+				mContext.sendBroadcast(broadcast);
+			}
+		});
+	}
 }

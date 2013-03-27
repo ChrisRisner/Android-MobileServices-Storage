@@ -1,7 +1,16 @@
 package com.msdpe.storagedemo;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.List;
 import java.util.Map;
+
+import com.google.gson.JsonObject;
+import com.msdpe.storagedemo.BlobDetailsActivity.ImageFetcherTask;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -12,8 +21,14 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.v4.app.NavUtils;
 import android.util.Log;
 import android.view.ActionMode;
@@ -28,6 +43,7 @@ import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 import android.view.View;
@@ -40,6 +56,11 @@ public class BlobsActivity extends ListActivity {
 	private ActionMode mActionMode;
 	private int mSelectedBlobPosition;
 	private String mContainerName;
+	private Button btnPositiveDialog;
+	private EditText mTxtBlobName;
+	private ImageView mImgBlobImage;
+	private Uri mImageUri;
+	private AlertDialog mAlertDialog;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -126,28 +147,39 @@ public class BlobsActivity extends ListActivity {
 			return true;
 		case R.id.action_add_blob:
 		      //Show new table dialog
-//			AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+			AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
 //            // Get the layout inflater
-//            LayoutInflater inflater = ((Activity) mContext).getLayoutInflater();
+            LayoutInflater inflater = ((Activity) mContext).getLayoutInflater();
 //            //Create our dialog view
-//            View dialogView = inflater.inflate(R.layout.dialog_new_container, null);
-//            final EditText txtContainerName = (EditText) dialogView.findViewById(R.id.txtContainerName);
-//
-//            final ToggleButton btnIsPublic = (ToggleButton) dialogView.findViewById(R.id.btnIsPublic);
-//            builder.setView(dialogView)
-//                   .setPositiveButton(R.string.create, new DialogInterface.OnClickListener() {
-//                       @Override
-//                       public void onClick(DialogInterface dialog, int id) {
-//                    	   mStorageService.addContainer(txtContainerName.getText().toString(), btnIsPublic.isChecked());                          
-//                       }
-//                   })
-//                   .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-//                       public void onClick(DialogInterface dialog, int id) {
-//                    	   dialog.cancel();
-//                       }
-//                   });    
-//            
-//            builder.show();
+            View dialogView = inflater.inflate(R.layout.dialog_new_blob, null);
+            mTxtBlobName = (EditText) dialogView.findViewById(R.id.txtBlobName);            
+            final Button btnSelectImage = (Button) dialogView.findViewById(R.id.btnSelectImage);
+            mImgBlobImage = (ImageView) dialogView.findViewById(R.id.imgBlobImage);
+            
+            //Set select image handler
+            btnSelectImage.setOnClickListener(new OnClickListener() {				
+				@Override
+				public void onClick(View v) {
+					selectImage();
+				}
+			});
+            
+            builder.setView(dialogView)
+                   .setPositiveButton(R.string.create, null)
+                   .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                       public void onClick(DialogInterface dialog, int id) {
+                    	   dialog.cancel();
+                       }
+                   });                
+            mAlertDialog = builder.show();
+            //We're overriding the button's click here so it won't close if we're not ready
+            btnPositiveDialog = mAlertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+            btnPositiveDialog.setOnClickListener(new OnClickListener() {				
+				@Override
+				public void onClick(View v) {
+					mStorageService.getSasForNewBlob(mContainerName, mTxtBlobName.getText().toString());
+				}
+			});
 		    break;
 		}
 		return super.onOptionsItemSelected(item);
@@ -157,6 +189,7 @@ public class BlobsActivity extends ListActivity {
 	protected void onResume() {
 		IntentFilter filter = new IntentFilter();
 		filter.addAction("blobs.loaded");
+		filter.addAction("blob.created");
 		registerReceiver(receiver, filter);
 		super.onResume();
 	}
@@ -169,17 +202,23 @@ public class BlobsActivity extends ListActivity {
 	
 	private BroadcastReceiver receiver = new BroadcastReceiver() {
 		public void onReceive(Context context, android.content.Intent intent) {
-			
-			List<Map<String,String>> blobs = mStorageService.getLoadedBlobNames();
-			
-			String[] strBlobs = new String[blobs.size()];
-			for (int i = 0; i < blobs.size(); i ++) {
-				strBlobs[i] = blobs.get(i).get("BlobName");
+			String intentAction = intent.getAction();
+			if (intentAction.equals("blobs.loaded")) {
+				List<Map<String,String>> blobs = mStorageService.getLoadedBlobNames();
+				
+				String[] strBlobs = new String[blobs.size()];
+				for (int i = 0; i < blobs.size(); i ++) {
+					strBlobs[i] = blobs.get(i).get("BlobName");
+				}
+				
+				ArrayAdapter<String> listAdapter = new ArrayAdapter<String>(mContext,
+		                android.R.layout.simple_list_item_1, strBlobs);
+				setListAdapter(listAdapter);	
+			} else if (intentAction.equals("blob.created")) {
+				JsonObject blob = mStorageService.getLoadedBlob();
+				String sasUrl = blob.getAsJsonPrimitive("sasUrl").toString();				
+				(new ImageUploaderTask(sasUrl)).execute();
 			}
-			
-			ArrayAdapter<String> listAdapter = new ArrayAdapter<String>(mContext,
-	                android.R.layout.simple_list_item_1, strBlobs);
-			setListAdapter(listAdapter);	
 			
 		}
 	};
@@ -227,4 +266,86 @@ public class BlobsActivity extends ListActivity {
 	        mActionMode = null;
 	    }
 	};
+	
+	// Fire off intent to select image from gallary
+ 	protected void selectImage() {
+ 		Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+ 		intent.setType("image/*");
+ 		startActivityForResult(intent, 1111);
+ 	}
+	 	
+ // Result handler for any intents started with startActivityForResult
+ 	@Override
+ 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+ 		super.onActivityResult(requestCode, resultCode, data);
+ 		try {
+ 			//handle result from gallary select
+ 			if (requestCode == 1111) {
+ 				Uri currImageURI = data.getData();
+ 				mImageUri = currImageURI;
+ 				//Set the image view's image by using imageUri
+ 				mImgBlobImage.setImageURI(currImageURI);
+ 			}
+ 		} catch (Exception ex) {
+ 			Log.e(TAG, ex.getMessage());
+ 		}
+ 	}	
+ 	
+ 	class ImageUploaderTask extends AsyncTask<Void, Void, Boolean> {
+	    private String mUrl;
+	    //private Bitmap mBitmap;
+
+	    public ImageUploaderTask(String url) {
+	    	mUrl = url;
+	    }
+
+	    @Override
+	    protected Boolean doInBackground(Void... params) {
+	         
+	    	try {
+		    	Cursor cursor = getContentResolver().query(mImageUri, null,null, null, null);
+				cursor.moveToFirst();
+				int index = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+				String absoluteFilePath = cursor.getString(index);
+				FileInputStream fis = new FileInputStream(absoluteFilePath);
+				int bytesRead = 0;
+				ByteArrayOutputStream bos = new ByteArrayOutputStream();
+				byte[] b = new byte[1024];
+				while ((bytesRead = fis.read(b)) != -1) {
+					bos.write(b, 0, bytesRead);
+				}
+				byte[] bytes = bos.toByteArray();
+				// Post our byte array to the server
+				URL url = new URL(mUrl.replace("\"", ""));
+				HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+				urlConnection.setDoOutput(true);
+				urlConnection.setRequestMethod("PUT");
+				urlConnection.addRequestProperty("Content-Type", "image/jpeg");
+				urlConnection.setRequestProperty("Content-Length", ""+ bytes.length);
+				// Write image data to server
+				DataOutputStream wr = new DataOutputStream(urlConnection.getOutputStream());
+				wr.write(bytes);
+				wr.flush();
+				wr.close();
+				int response = urlConnection.getResponseCode();
+				if (response == 201
+						&& urlConnection.getResponseMessage().equals("Created")) {
+					return true;
+				}
+	    	} catch (Exception ex) {
+	    		Log.e(TAG, ex.getMessage());
+	    	}
+	        return false;
+	    	
+	    }
+
+	    @Override
+	    protected void onPostExecute(Boolean uploaded) {
+	        if (uploaded) {
+	        	mAlertDialog.cancel();
+	        	mStorageService.getBlobsForContainer(mContainerName);
+	        }
+	    }
+
+	}
 }

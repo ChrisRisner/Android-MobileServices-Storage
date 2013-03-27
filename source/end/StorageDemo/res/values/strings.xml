@@ -28,5 +28,7 @@
     <string name="url">URL:</string>
     <string name="content_type">Content-Type:</string>
    	<string name="load_with_sas">Load with SAS</string>
+   	<string name="select_image">Select Image</string>
+   	<string name="create_with_sas">Create Blob with SAS</string>
 
 </resources>
