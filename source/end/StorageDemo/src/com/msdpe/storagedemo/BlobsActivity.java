@@ -293,8 +293,6 @@ public class BlobsActivity extends ListActivity {
  	
  	class ImageUploaderTask extends AsyncTask<Void, Void, Boolean> {
 	    private String mUrl;
-	    //private Bitmap mBitmap;
-
 	    public ImageUploaderTask(String url) {
 	    	mUrl = url;
 	    }
