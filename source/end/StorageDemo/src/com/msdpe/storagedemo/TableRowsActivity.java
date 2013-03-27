@@ -1,23 +1,33 @@
+/*
+ Copyright 2013 Microsoft Corp
+ 
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+ 
+ http://www.apache.org/licenses/LICENSE-2.0
+ 
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ */
+
 package com.msdpe.storagedemo;
 
-import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.drawable.GradientDrawable.Orientation;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
@@ -34,13 +44,11 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.Toast;
 
 public class TableRowsActivity extends ListActivity {
 	private Context mContext;
@@ -55,30 +63,22 @@ public class TableRowsActivity extends ListActivity {
 		super.onCreate(savedInstanceState);
 		// Show the Up button in the action bar.
 		setupActionBar();
-		
+		//Get access to the storage service
 		StorageApplication myApp = (StorageApplication) getApplication();
-		mStorageService = myApp.getStorageService();		
-		mContext = this;
+		mStorageService = myApp.getStorageService();
 		
+		mContext = this;
+		//Get data from the intent that launched this activity
 		Intent launchIntent = getIntent();
 		mTableName = launchIntent.getStringExtra("TableName");
-		Log.i(TAG, "TABLE: " + mTableName);
-//		if (savedInstanceState != null && savedInstanceState.containsKey("TableName")) {
-//			mTableName = savedInstanceState.getString("TableName");
-//		}
-		
+		//Get the rows for the table
 		mStorageService.getTableRows(mTableName);	
-		
+		//Set the click listener for items in the list view
 		this.getListView().setOnItemClickListener(new OnItemClickListener() {
-
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position,
 					long id) {
-				//This was tested against the Users table
-//				JsonElement element = mStorageService.getLoadedTableRows()[position];
-//				String name = element.getAsJsonObject().getAsJsonPrimitive("Name").getAsString();				
-//				Toast.makeText(mContext, name, Toast.LENGTH_SHORT).show();
-				
+				//Launch the activity to edit the existing row
 				Intent tableIntent = new Intent(getApplicationContext(), EditTableRowActivity.class);
 				tableIntent.putExtra("TableName", mTableName);
 				tableIntent.putExtra("IsNewRow", false);
@@ -86,18 +86,14 @@ public class TableRowsActivity extends ListActivity {
 				startActivity(tableIntent);
 			}
 		});
-		
+		//Handle long clicks on an item in the list view to show the delete option
 		this.getListView().setOnItemLongClickListener(new OnItemLongClickListener() {
-
 			@Override
 			public boolean onItemLongClick(AdapterView<?> parent, View view,
 					int position, long id) {
-				//Toast.makeText(mCon, "long click", Toast.LENGTH_SHORT).show();
-				
 				if (mActionMode != null) {
 		            return false;
 		        }
-
 				mSelectedRowPosition = position;
 		        // Start the CAB using the ActionMode.Callback defined above
 		        mActionMode = ((Activity) mContext).startActionMode(mActionModeCallback);
@@ -107,13 +103,9 @@ public class TableRowsActivity extends ListActivity {
 		});
 	}
 	
-//	@Override
-//	protected void onSaveInstanceState(Bundle outState) {		
-//		super.onSaveInstanceState(outState);
-//		Log.w(TAG, "onSaveInstanceState");
-//		outState.putString("TableName", mTableName);
-//	}
-	
+	/***
+	 * Register for broadcasts
+	 */
 	@Override
 	protected void onResume() {
 		Log.w(TAG, "onResume");
@@ -123,6 +115,9 @@ public class TableRowsActivity extends ListActivity {
 		super.onResume();
 	}
 	
+	/***
+	 * Unregister for broadcasts
+	 */
 	@Override
 	protected void onPause() {
 		Log.w(TAG, "onPause");
@@ -146,13 +141,6 @@ public class TableRowsActivity extends ListActivity {
 		getMenuInflater().inflate(R.menu.tablerows, menu);
 		return true;
 	}
-	
-//	@Override
-//	protected void onRestoreInstanceState(Bundle state) {
-//		super.onRestoreInstanceState(state);
-//		
-//		Log.w(TAG, "onRestoreInstanceState");
-//	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
@@ -168,10 +156,12 @@ public class TableRowsActivity extends ListActivity {
 			NavUtils.navigateUpFromSameTask(this);
 			return true;
 		case R.id.action_add_table_row:
+			//Launch the intent to add a new row
 			Intent tableIntent = new Intent(getApplicationContext(), EditTableRowActivity.class);
 			tableIntent.putExtra("TableName", mTableName);
 			tableIntent.putExtra("IsNewRow", true);
 			if (mStorageService.getLoadedTableRows().length == 0) {
+				//If this table doesn't have any rows, we're going to be creating it's first
 				tableIntent.putExtra("IsNewTable", true);
 			}
 			startActivity(tableIntent);
@@ -180,15 +170,21 @@ public class TableRowsActivity extends ListActivity {
 		return super.onOptionsItemSelected(item);
 	}
 	
+	/***
+	 * Broadcast receiver for handling when table rows are added
+	 */
 	private BroadcastReceiver receiver = new BroadcastReceiver() {
 		public void onReceive(Context context, android.content.Intent intent) {
 			
 			TableRowArrayAdapter listAdapter = new TableRowArrayAdapter(mContext, mStorageService.getLoadedTableRows());
-			setListAdapter(listAdapter);
-			
+			setListAdapter(listAdapter);			
 		}
 	};
 	
+	/***
+	 * A custom array adapter for handling table row data and tying it to the list view
+	 *
+	 */
 	private class TableRowArrayAdapter extends ArrayAdapter<JsonElement> {
 		private Context mContext;
 		private JsonElement[] mTableRows;
@@ -199,45 +195,34 @@ public class TableRowsActivity extends ListActivity {
 			this.mTableRows = tableRows;
 		}
 		
+		/***
+		 * Creates the UI for each listview row
+		 */
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
 
-//			return super.getView(position, convertView, parent);
 			LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			View view = inflater.inflate(R.layout.list_item_table_row_read, parent, false);
-//			TextView lblName = (TextView) view.findViewById(R.id.lblName);
-//			lblName.setText(mTableRows[position].getAsJsonObject().toString());
-//			
 			Set<Entry<String, JsonElement>> set = mTableRows[position].getAsJsonObject().entrySet();
-//			lblName.setText("size: " + set.size());
-			
-			//TextView lblPartitionKeyValue = (TextView) view.findViewById(R.id.lblPartitionKeyValue);
-			//TextView lblRowKeyValue = (TextView) view.findViewById(R.id.lblRowKeyValue);
 			LinearLayout layoutItem = (LinearLayout) view.findViewById(R.id.layoutItem);
-			
+			//Loop through each data item in the row and create a layout with the key and 
+			//value displayed in TextViews within it
 			for (Entry<String, JsonElement> entry : set) {
-				Log.i(TAG, entry.getKey());
-				
+				Log.i(TAG, entry.getKey());				
 				RelativeLayout rowLayout = new RelativeLayout(mContext);
-				RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-				
+				RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);				
 				rowLayout.setLayoutParams(params);				
-				//rowLayout.setOrientation(LinearLayout.HORIZONTAL);
 				TextView lblKey = new TextView(mContext);
-				lblKey.setText(entry.getKey());
-				//lblKey.setPadding(20, 0, 50, 0);
-				
+				lblKey.setText(entry.getKey());				
 				RelativeLayout.LayoutParams keyParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 				keyParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
 				keyParams.leftMargin = 20;
-				lblKey.setLayoutParams(keyParams);
-				
-				TextView lblValue = new TextView(mContext);
-				
+				lblKey.setLayoutParams(keyParams);				
+				TextView lblValue = new TextView(mContext);				
 				RelativeLayout.LayoutParams valueParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 				valueParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
 				lblValue.setLayoutParams(valueParams);
-				
+				//Limit the amount of text we show so the UI isn't dirty
 				InputFilter[] FilterArray = new InputFilter[1];
 				FilterArray[0] = new InputFilter.LengthFilter(25);
 				lblValue.setFilters(FilterArray);
@@ -246,14 +231,12 @@ public class TableRowsActivity extends ListActivity {
 				rowLayout.addView(lblKey);
 				rowLayout.addView(lblValue);
 				layoutItem.addView(rowLayout);
-			}
-			
+			}			
 			return view;
 		}
 	}
 	
 	private ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
-
 	    // Called when the action mode is created; startActionMode() was called
 	    @Override
 	    public boolean onCreateActionMode(ActionMode mode, Menu menu) {
@@ -275,16 +258,10 @@ public class TableRowsActivity extends ListActivity {
 	    public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
 	        switch (item.getItemId()) {
 	            case R.id.action_delete_table:
-	            	//Delete the selected table
-	            	//String tableName = mStorageService.getLoadedTables().get(mSelectedTablePosition).get("TableName");
-	            	//Toast.makeText(mCon, "table:" + tableName, Toast.LENGTH_SHORT).show();
-	            	//mStorageService.deleteTable(tableName);
-	            	//mStorageService.deleteTable(tableName)
-	            	
+	            	//Delete the selected table row	            	
 	            	JsonElement element = mStorageService.getLoadedTableRows()[mSelectedRowPosition];
 					String partitionKey = element.getAsJsonObject().getAsJsonPrimitive("PartitionKey").getAsString();				
-					String rowKey = element.getAsJsonObject().getAsJsonPrimitive("RowKey").getAsString();
-	            	
+					String rowKey = element.getAsJsonObject().getAsJsonPrimitive("RowKey").getAsString();	            	
 	            	mStorageService.deleteTableRow(mTableName, partitionKey, rowKey);
 	                mode.finish(); // Action picked, so close the CAB
 	                return true;

@@ -1,16 +1,30 @@
+/*
+ Copyright 2013 Microsoft Corp
+ 
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+ 
+ http://www.apache.org/licenses/LICENSE-2.0
+ 
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ */
+
 package com.msdpe.storagedemo;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.FileInputStream;
-import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
 import com.google.gson.JsonObject;
-import com.msdpe.storagedemo.BlobDetailsActivity.ImageFetcherTask;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -22,8 +36,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -44,8 +56,6 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.Toast;
-import android.widget.ToggleButton;
 import android.view.View;
 import android.widget.TextView;
 
@@ -67,23 +77,23 @@ public class BlobsActivity extends ListActivity {
 		super.onCreate(savedInstanceState);
 		// Show the Up button in the action bar.
 		setupActionBar();
-				
+		//Get access to the storage service
 		StorageApplication myApp = (StorageApplication) getApplication();
 		mStorageService = myApp.getStorageService();
-		
+		//Get data from the intent that launched this activity
 		Intent launchIntent = getIntent();
 		mContainerName = launchIntent.getStringExtra("ContainerName");
-		Log.i(TAG, "Container: " + mContainerName);
 				
 		mContext = this;
+		//Get the blobs for the selected container
 		mStorageService.getBlobsForContainer(mContainerName);		
 		
+		//Handle clicking on an individual item in the list view
 		this.getListView().setOnItemClickListener(new OnItemClickListener() {
-
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position,
 					long id) {
-				
+				//Launch the BlobDetailsActivity
 				TextView lblTable = (TextView) view;
 				Intent blobDetailsIntent = new Intent(getApplicationContext(), BlobDetailsActivity.class);
 				blobDetailsIntent.putExtra("ContainerName", mContainerName);
@@ -92,25 +102,19 @@ public class BlobsActivity extends ListActivity {
 				startActivity(blobDetailsIntent);
 			}
 		});
-		
+		//Handle long clicking an individual item in the list view
 		this.getListView().setOnItemLongClickListener(new OnItemLongClickListener() {
-
 			@Override
 			public boolean onItemLongClick(AdapterView<?> parent, View view,
-					int position, long id) {
-				//Toast.makeText(mCon, "long click", Toast.LENGTH_SHORT).show();
-				
+					int position, long id) {				
 				if (mActionMode != null) {
 		            return false;
 		        }
-
 				mSelectedBlobPosition = position;
 		        // Start the CAB using the ActionMode.Callback defined above
 		        mActionMode = ((Activity) mContext).startActionMode(mActionModeCallback);
 		        view.setSelected(true);
 		        return true;
-				
-				//return false;
 			}
 		});
 	}
@@ -148,14 +152,13 @@ public class BlobsActivity extends ListActivity {
 		case R.id.action_add_blob:
 		      //Show new table dialog
 			AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-//            // Get the layout inflater
+            // Get the layout inflater
             LayoutInflater inflater = ((Activity) mContext).getLayoutInflater();
-//            //Create our dialog view
+            //Create our dialog view
             View dialogView = inflater.inflate(R.layout.dialog_new_blob, null);
             mTxtBlobName = (EditText) dialogView.findViewById(R.id.txtBlobName);            
             final Button btnSelectImage = (Button) dialogView.findViewById(R.id.btnSelectImage);
-            mImgBlobImage = (ImageView) dialogView.findViewById(R.id.imgBlobImage);
-            
+            mImgBlobImage = (ImageView) dialogView.findViewById(R.id.imgBlobImage);            
             //Set select image handler
             btnSelectImage.setOnClickListener(new OnClickListener() {				
 				@Override
@@ -163,7 +166,10 @@ public class BlobsActivity extends ListActivity {
 					selectImage();
 				}
 			});
-            
+            //Build up the dialog view and add buttons, note that the positive button
+            //has no click listener here.  If hte listener is done here, we can't prevent
+            //the OK button from closing the dialog when clicked if they don't 
+            //have an image selected
             builder.setView(dialogView)
                    .setPositiveButton(R.string.create, null)
                    .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
@@ -185,6 +191,9 @@ public class BlobsActivity extends ListActivity {
 		return super.onOptionsItemSelected(item);
 	}
 	
+	/***
+	 * Register for broadcasts
+	 */
 	@Override
 	protected void onResume() {
 		IntentFilter filter = new IntentFilter();
@@ -194,37 +203,41 @@ public class BlobsActivity extends ListActivity {
 		super.onResume();
 	}
 	
+	/***
+	 * Unregister for broadcasts
+	 */
 	@Override
 	protected void onPause() {
 		unregisterReceiver(receiver);
 		super.onPause();
 	}
 	
+	/***
+	 * Broadcast receiver handles blobs being loaded or a new blob being created
+	 */
 	private BroadcastReceiver receiver = new BroadcastReceiver() {
 		public void onReceive(Context context, android.content.Intent intent) {
 			String intentAction = intent.getAction();
 			if (intentAction.equals("blobs.loaded")) {
-				List<Map<String,String>> blobs = mStorageService.getLoadedBlobNames();
-				
+				//If the blobs have been loaded, wire up our list view
+				List<Map<String,String>> blobs = mStorageService.getLoadedBlobNames();				
 				String[] strBlobs = new String[blobs.size()];
 				for (int i = 0; i < blobs.size(); i ++) {
 					strBlobs[i] = blobs.get(i).get("BlobName");
-				}
-				
+				}				
 				ArrayAdapter<String> listAdapter = new ArrayAdapter<String>(mContext,
 		                android.R.layout.simple_list_item_1, strBlobs);
 				setListAdapter(listAdapter);	
 			} else if (intentAction.equals("blob.created")) {
+				//If a blob has been created, upload the image
 				JsonObject blob = mStorageService.getLoadedBlob();
 				String sasUrl = blob.getAsJsonPrimitive("sasUrl").toString();				
 				(new ImageUploaderTask(sasUrl)).execute();
-			}
-			
+			}			
 		}
 	};
 	
 	private ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
-
 	    // Called when the action mode is created; startActionMode() was called
 	    @Override
 	    public boolean onCreateActionMode(ActionMode mode, Menu menu) {
@@ -233,7 +246,6 @@ public class BlobsActivity extends ListActivity {
 	        inflater.inflate(R.menu.context_blobs, menu);
 	        return true;
 	    }
-
 	    // Called each time the action mode is shown. Always called after onCreateActionMode, but
 	    // may be called multiple times if the mode is invalidated.
 	    @Override
@@ -246,12 +258,9 @@ public class BlobsActivity extends ListActivity {
 	    public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
 	        switch (item.getItemId()) {
 	            case R.id.action_delete_blob:
-	            	//Delete the selected table
+	            	//Delete the selected blob
 	            	String blobName = mStorageService.getLoadedBlobNames().get(mSelectedBlobPosition).get("BlobName");
-	            	//Toast.makeText(mCon, "table:" + tableName, Toast.LENGTH_SHORT).show();
-	            	mStorageService.deleteBlob(mContainerName, blobName);
-	            	//delete the container
-	            	
+	            	mStorageService.deleteBlob(mContainerName, blobName);	            	
 	                mode.finish(); // Action picked, so close the CAB
 	                return true;
 	            default:
@@ -267,14 +276,14 @@ public class BlobsActivity extends ListActivity {
 	    }
 	};
 	
-	// Fire off intent to select image from gallary
+	// Fire off intent to select image from gallery
  	protected void selectImage() {
  		Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
  		intent.setType("image/*");
  		startActivityForResult(intent, 1111);
  	}
 	 	
- // Result handler for any intents started with startActivityForResult
+ 	// Result handler for any intents started with startActivityForResult
  	@Override
  	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
  		super.onActivityResult(requestCode, resultCode, data);
@@ -291,6 +300,9 @@ public class BlobsActivity extends ListActivity {
  		}
  	}	
  	
+ 	/***
+ 	 * Handles uploading an image to a specified url
+ 	 */
  	class ImageUploaderTask extends AsyncTask<Void, Void, Boolean> {
 	    private String mUrl;
 	    public ImageUploaderTask(String url) {
@@ -298,9 +310,9 @@ public class BlobsActivity extends ListActivity {
 	    }
 
 	    @Override
-	    protected Boolean doInBackground(Void... params) {
-	         
+	    protected Boolean doInBackground(Void... params) {	         
 	    	try {
+	    		//Get the image data
 		    	Cursor cursor = getContentResolver().query(mImageUri, null,null, null, null);
 				cursor.moveToFirst();
 				int index = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
@@ -313,7 +325,7 @@ public class BlobsActivity extends ListActivity {
 					bos.write(b, 0, bytesRead);
 				}
 				byte[] bytes = bos.toByteArray();
-				// Post our byte array to the server
+				// Post our image data (byte array) to the server
 				URL url = new URL(mUrl.replace("\"", ""));
 				HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
 				urlConnection.setDoOutput(true);
@@ -326,6 +338,7 @@ public class BlobsActivity extends ListActivity {
 				wr.flush();
 				wr.close();
 				int response = urlConnection.getResponseCode();
+				//If we successfully uploaded, return true
 				if (response == 201
 						&& urlConnection.getResponseMessage().equals("Created")) {
 					return true;
@@ -333,8 +346,7 @@ public class BlobsActivity extends ListActivity {
 	    	} catch (Exception ex) {
 	    		Log.e(TAG, ex.getMessage());
 	    	}
-	        return false;
-	    	
+	        return false;	    	
 	    }
 
 	    @Override
@@ -344,6 +356,5 @@ public class BlobsActivity extends ListActivity {
 	        	mStorageService.getBlobsForContainer(mContainerName);
 	        }
 	    }
-
 	}
 }
