@@ -59,7 +59,7 @@ public class StorageService {
 	public StorageService(Context context) {
 		mContext = context;		
 		try {
-			mClient = new MobileServiceClient("https://storagedemo.azure-mobile.net/", "oZaSIwBYgHrBiCApdCVcatyDxHQRCT23", mContext);
+			mClient = new MobileServiceClient("https://mobileserviceurl.azure-mobile.net/", "applicationkey", mContext);
 			mTableTables = mClient.getTable("Tables");		
 			mTableTableRows = mClient.getTable("TableRows");
 			mTableContainers = mClient.getTable("BlobContainers");
