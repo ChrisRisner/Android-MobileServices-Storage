@@ -1,0 +1,11 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+
+    <item
+        android:id="@+id/action_save_row"
+        android:orderInCategory="100"
+        android:showAsAction="always"
+        android:icon="@drawable/content_save"
+		android:title="@string/save_row"/>
+
+</menu><!-- From: file:/C:/Users/serpe_000/Documents/GitHub/StorageDemo2/storageDemo/src/main/res/menu/edit_table_row.xml -->

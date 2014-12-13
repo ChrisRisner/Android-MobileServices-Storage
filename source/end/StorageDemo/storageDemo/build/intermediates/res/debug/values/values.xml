@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- From: file:/C:/Users/serpe_000/Documents/GitHub/StorageDemo2/storageDemo/src/main/res/values/dimens.xml -->
+    <eat-comment/>
+    <dimen name="activity_horizontal_margin">8dp</dimen>
+    <dimen name="activity_vertical_margin">8dp</dimen>
+    <dimen name="url_max_width">240dp</dimen>
+    <!-- From: file:/C:/Users/serpe_000/Documents/GitHub/StorageDemo2/storageDemo/src/main/res/values/strings.xml -->
+    <eat-comment/>
+    <string name="action_settings">Settings</string>
+    <string name="add_blob">Add Blob</string>
+    <string name="add_container">Add Container</string>
+    <string name="add_table">Add Table</string>
+    <string name="add_table_row">Add Row</string>
+    <string name="app_name">StorageDemo</string>
+    <string name="blob_name">Blob Name:</string>
+    <string name="blob_storage">Blob Storage</string>
+    <string name="cancel">Cancel</string>
+    <string name="container_name">Container Name:</string>
+    <string name="content_type">Content-Type:</string>
+    <string name="create">Create</string>
+    <string name="create_with_sas">Create Blob with SAS</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="is_public">Is Public:</string>
+    <string name="launch_screen_info">Which type of Windows Azure storage do you want to work with?</string>
+    <string name="load_with_sas">Load with SAS</string>
+    <string name="no">No</string>
+    <string name="save_row">Save Row</string>
+    <string name="select_image">Select Image</string>
+    <string name="table_name">Table Name:</string>
+    <string name="table_storage">Table Storage</string>
+    <string name="title_activity_blob_details">BlobDetailsActivity</string>
+    <string name="title_activity_blobs">BlobsActivity</string>
+    <string name="title_activity_containers">ContainersActivity</string>
+    <string name="title_activity_new_table_row">NewTableRowActivity</string>
+    <string name="title_activity_tables">TablesActivity</string>
+    <string name="url">URL:</string>
+    <string name="yes">Yes</string>
+    <!-- From: file:/C:/Users/serpe_000/Documents/GitHub/StorageDemo2/storageDemo/src/main/res/values/styles.xml -->
+    <eat-comment/>
+    <style name="AppBaseTheme" parent="android:Theme.Light">
+        <!--
+            Theme customizations available in newer API levels can go in
+            res/values-vXX/styles.xml, while customizations related to
+            backward-compatibility can go here.
+        -->
+    </style>
+    <style name="AppTheme" parent="AppBaseTheme">
+        <!-- All customizations that are NOT specific to a particular API-level can go here. -->
+    </style>
+</resources>

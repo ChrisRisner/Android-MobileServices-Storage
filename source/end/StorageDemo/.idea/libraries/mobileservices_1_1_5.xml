@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="mobileservices-1.1.5">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/storageDemo/libs/azuresdk-android-1.1.5/mobileservices/mobileservices-1.1.5.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/storageDemo/libs/azuresdk-android-1.1.5/mobileservices/mobileservices-1.1.5-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
