@@ -3,6 +3,8 @@ This is a storage sample which makes use of WIndows Azure Mobile Services and Wi
 
 Below you will find requirements and deployment instructions.
 
+**Update: 1-11-2015** - You may also need the **android.permission.READ_EXERNAL_STORAGE** in your manifest file if images are stored on a SD card.
+
 ## Requirements
 * Eclipse - This sample was built with Eclipse Indigo.
 * Android SDK - You can download this from the [Android Developer portal](http://developer.android.com/sdk/index.html).
