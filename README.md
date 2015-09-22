@@ -1,3 +1,9 @@
+---
+services:
+platforms:
+author: azure
+---
+
 ﻿# Android - Mobile Services - StorageDemo
 This is a storage sample which makes use of WIndows Azure Mobile Services and Windows Azure Table and Blob Storage.  Mobile Services uses SQL Database for it's normal data storage so we have to do a bit of additional work in order to access Table and Blob Storage.  This sample was built using Eclipse, the Android SDK, and the Andorid Mobile Services SDK.  It was built using a minimum SDK version of 11 and a target version of 17.  The minimum version was used soley for UI purposes.  All of the data access and storage access can be used with any Android version that supports the Mobile Services SDK (8 and up).
 
