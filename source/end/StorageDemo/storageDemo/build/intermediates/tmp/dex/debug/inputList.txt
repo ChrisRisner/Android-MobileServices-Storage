@@ -1,0 +1,5 @@
+C:\Users\serpe_000\Documents\GitHub\StorageDemo2\storageDemo\build\intermediates\classes\debug
+C:\Users\serpe_000\Documents\GitHub\StorageDemo2\storageDemo\build\intermediates\pre-dexed\debug\notifications-1.0.1-1c34a73835171bfe94d2280bea4283e8f0c693eb.jar
+C:\Users\serpe_000\Documents\GitHub\StorageDemo2\storageDemo\build\intermediates\pre-dexed\debug\mobileservices-1.1.5-15dd0a79bb410eb66a15e3d69c7f974d9d4f11f3.jar
+C:\Users\serpe_000\Documents\GitHub\StorageDemo2\storageDemo\build\intermediates\pre-dexed\debug\gson-2.3.1-a4343a26b7bf199721c8fe1873e84e89b8ab69e6.jar
+C:\Users\serpe_000\Documents\GitHub\StorageDemo2\storageDemo\build\intermediates\pre-dexed\debug\support-v4-18.0.0-d6d19106e6f55a9f0b1a16d504c833b2cd4be259.jar

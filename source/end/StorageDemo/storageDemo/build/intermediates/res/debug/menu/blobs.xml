@@ -1,0 +1,9 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/action_add_blob"
+        android:orderInCategory="100"
+        android:showAsAction="always"
+        android:icon="@drawable/content_new"
+        android:title="@string/add_blob"/>
+</menu><!-- From: file:/C:/Users/serpe_000/Documents/GitHub/StorageDemo2/storageDemo/src/main/res/menu/blobs.xml -->

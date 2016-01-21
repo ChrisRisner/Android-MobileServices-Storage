@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<items version="2" >
+
+    <item
+        jar="C:\Users\serpe_000\Documents\GitHub\StorageDemo2\storageDemo\libs\azuresdk-android-1.1.5\notifications\notifications-1.0.1.jar"
+        jumboMode="false"
+        revision="21.1.1"
+        sha1="d2498fce7adbdb5ebd37dafc56d8056db60f51fe">
+        <dex dex="C:\Users\serpe_000\Documents\GitHub\StorageDemo2\storageDemo\build\intermediates\pre-dexed\debug\notifications-1.0.1-1c34a73835171bfe94d2280bea4283e8f0c693eb.jar" />
+    </item>
+    <item
+        jar="C:\Program Files (x86)\Android\sdk\extras\android\m2repository\com\android\support\support-v4\18.0.0\support-v4-18.0.0.jar"
+        jumboMode="false"
+        revision="21.1.1"
+        sha1="44ec51e9d395a47aab135e5e1b556c0007442156">
+        <dex dex="C:\Users\serpe_000\Documents\GitHub\StorageDemo2\storageDemo\build\intermediates\pre-dexed\debug\support-v4-18.0.0-d6d19106e6f55a9f0b1a16d504c833b2cd4be259.jar" />
+    </item>
+    <item
+        jar="C:\Users\serpe_000\Documents\GitHub\StorageDemo2\storageDemo\libs\azuresdk-android-1.1.5\mobileservices\mobileservices-1.1.5.jar"
+        jumboMode="false"
+        revision="21.1.1"
+        sha1="12188408c45b88124cb38dd2bedc9b314b5f554b">
+        <dex dex="C:\Users\serpe_000\Documents\GitHub\StorageDemo2\storageDemo\build\intermediates\pre-dexed\debug\mobileservices-1.1.5-15dd0a79bb410eb66a15e3d69c7f974d9d4f11f3.jar" />
+    </item>
+    <item
+        jar="C:\Users\serpe_000\.gradle\caches\modules-2\files-2.1\com.google.code.gson\gson\2.3.1\ecb6e1f8e4b0e84c4b886c2f14a1500caf309757\gson-2.3.1.jar"
+        jumboMode="false"
+        revision="21.1.1"
+        sha1="ecb6e1f8e4b0e84c4b886c2f14a1500caf309757">
+        <dex dex="C:\Users\serpe_000\Documents\GitHub\StorageDemo2\storageDemo\build\intermediates\pre-dexed\debug\gson-2.3.1-a4343a26b7bf199721c8fe1873e84e89b8ab69e6.jar" />
+    </item>
+
+</items>
